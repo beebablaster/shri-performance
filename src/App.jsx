@@ -34,30 +34,32 @@ function App() {
         </header>;
     }
 
-    function Event(props) {
-        const ref = React.useRef();
+    const Event = React.memo(function Event(props) {
+        const ref = React.useRef(null);
+        const reported = React.useRef(false);
 
-        const {onSize} = props;
-
-        React.useEffect(() => {
-            const width = ref.current.offsetWidth;
-            const height = ref.current.offsetHeight;
-            if (onSize) {
-                onSize({width, height});
+        React.useLayoutEffect(() => {
+            if (!reported.current && props.onSize) {
+                const { offsetWidth: width, offsetHeight: height } = ref.current;
+                props.onSize({ width, height });
+                reported.current = true;
             }
-        });
+        }, []);
 
-        return <li ref={ref} className={'event' + (props.slim ? ' event_slim' : '')}>
-            <button className="event__button">
-                <span className={`event__icon event__icon_${props.icon}`} role="img"
-                      aria-label={props.iconLabel}></span>
-                <h4 className="event__title">{props.title}</h4>
-                {props.subtitle &&
-                    <span className="event__subtitle">{props.subtitle}</span>
-                }
-            </button>
-        </li>;
-    }
+        return (
+            <li ref={ref} className={'event' + (props.slim ? ' event_slim' : '')}>
+                <button className="event__button">
+        <span
+            className={`event__icon event__icon_${props.icon}`}
+            role="img"
+            aria-label={props.iconLabel}
+        />
+                    <h4 className="event__title">{props.title}</h4>
+                    {props.subtitle && <span className="event__subtitle">{props.subtitle}</span>}
+                </button>
+            </li>
+        );
+    });
 
     const TABS = {
         all: {
@@ -173,6 +175,10 @@ function App() {
 
     function Main() {
         const ref = React.useRef();
+        const sizesRef = React.useRef([]);
+        const onSize = React.useCallback(size => {
+            sizesRef.current.push(size);
+        }, []);
         const initedRef = React.useRef(false);
         const [activeTab, setActiveTab] = React.useState('');
         const [hasRightScroll, setHasRightScroll] = React.useState(false);
@@ -188,19 +194,10 @@ function App() {
             setActiveTab(event.target.value);
         };
 
-        let sizes = [];
-        const onSize = size => {
-            sizes = [...sizes, size];
-        };
-
         React.useEffect(() => {
-            const sumWidth = sizes.reduce((acc, item) => acc + item.width, 0);
-
-            const newHasRightScroll = sumWidth > ref.current.offsetWidth;
-            if (newHasRightScroll !== hasRightScroll) {
-                setHasRightScroll(newHasRightScroll);
-            }
-        });
+            const sumWidth = sizesRef.current.reduce((acc, s) => acc + s.width, 0);
+            setHasRightScroll(sumWidth > ref.current.offsetWidth);
+        }, [activeTab]);
 
         const onArrowCLick = () => {
             const scroller = ref.current.querySelector('.section__panel:not(.section__panel_hidden)');
