@@ -1,9 +1,9 @@
-import React from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 function App() {
     function Header() {
-        let [expanded, setExpanded] = React.useState(false);
-        let [toggled, setToggled] = React.useState(false);
+        let [expanded, setExpanded] = useState(false);
+        let [toggled, setToggled] = useState(false);
 
         const onClick = () => {
             if (!toggled) {
@@ -35,11 +35,11 @@ function App() {
     }
 
     function Event(props) {
-        const ref = React.useRef();
+        const ref = useRef();
 
         const {onSize} = props;
 
-        React.useEffect(() => {
+        useEffect(() => {
             const width = ref.current.offsetWidth;
             const height = ref.current.offsetHeight;
             if (onSize) {
@@ -172,12 +172,12 @@ function App() {
     const TABS_KEYS = Object.keys(TABS);
 
     function Main() {
-        const ref = React.useRef();
-        const initedRef = React.useRef(false);
-        const [activeTab, setActiveTab] = React.useState('');
-        const [hasRightScroll, setHasRightScroll] = React.useState(false);
+        const ref = useRef();
+        const initedRef = useRef(false);
+        const [activeTab, setActiveTab] = useState('');
+        const [hasRightScroll, setHasRightScroll] = useState(false);
 
-        React.useEffect(() => {
+        useEffect(() => {
             if (!activeTab && !initedRef.current) {
                 initedRef.current = true;
                 setActiveTab(new URLSearchParams(location.search).get('tab') || 'all');
@@ -193,7 +193,7 @@ function App() {
             sizes = [...sizes, size];
         };
 
-        React.useEffect(() => {
+        useEffect(() => {
             const sumWidth = sizes.reduce((acc, item) => acc + item.width, 0);
 
             const newHasRightScroll = sumWidth > ref.current.offsetWidth;
